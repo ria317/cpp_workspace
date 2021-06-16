@@ -1,12 +1,8 @@
 #include <iostream>
 #include <stack>
+#include <queue>
 
 using namespace std;
-
-void print_bst_inorder() {
-
-}
-
 typedef struct Node {
 
     int value;
@@ -19,6 +15,68 @@ typedef struct Node {
         right = nullptr;
     }
 } Node;
+
+
+char canvas[100+10] = {0};
+
+void print_tree(Node* root) {
+
+    //// 트리의 level 갯수
+    // 1. tree 너비를 찾는다.
+    Node* tmp = root;
+    queue<pair<Node,int>> q;
+
+    vector<int> value_arr;
+    vector<int> depth_arr;
+
+    q.push(make_pair(*tmp, 0));
+
+    while(!q.empty()) {
+        Node idx = q.front().first;
+        int depth = q.front().second;
+        if( idx.left != nullptr ) {
+            q.push(make_pair(*idx.left, depth+1));
+        }
+
+        if( idx.right != nullptr) {
+            q.push(make_pair(*idx.right, depth+1));
+        }
+
+        value_arr.push_back(idx.value);
+        depth_arr.push_back(depth);
+        q.pop();
+    }
+
+    for(int i=0; i<value_arr.size(); i++) {
+        cout << "depth : " << depth_arr[i] << ", value : " << value_arr[i] << endl;
+    }
+    cout << endl;
+
+}
+
+
+void print2DUtil(Node *root, int space)
+{
+    // Base case
+    if (root == NULL)
+        return;
+
+    // Increase distance between levels
+    space += 10;
+
+    // Process right child first
+    print2DUtil(root->right, space);
+
+    // Print current node after space
+    // count
+    cout<<endl;
+    for (int i = 10; i < space; i++)
+        cout<<" ";
+    cout<<root->value<<"\n";
+
+    // Process left child
+    print2DUtil(root->left, space);
+}
 
 Node *insert(Node *root, int value)
 {
@@ -87,5 +145,8 @@ int main() {
     }
 
     travel_tree_inorder(root);
+
+    //print_tree(root);
+    print2DUtil(root, 0);
 
 }
