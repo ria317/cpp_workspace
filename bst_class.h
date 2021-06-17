@@ -15,7 +15,7 @@ public:
     void setValue(int val) { m_value = val; }
 
     bool insert(int value);
-    void remove(Node* root, int value);
+    Node* remove(int value );
     Node *find(int val);
     Node *find_parent(int val);
     void print2DUtil(int space);

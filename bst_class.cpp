@@ -6,6 +6,67 @@
 
 using namespace std;
 
+
+struct Trunk
+{
+    Trunk *prev;
+    string str;
+
+    Trunk(Trunk *prev, string str)
+    {
+        this->prev = prev;
+        this->str = str;
+    }
+};
+
+// Helper function to print branches of the binary tree
+void showTrunks(Trunk *p)
+{
+    if (p == nullptr) {
+        return;
+    }
+
+    showTrunks(p->prev);
+    cout << p->str;
+}
+
+// Recursive function to print a binary tree.
+// It uses the inorder traversal.
+void printTree(Node* root, Trunk *prev, bool isLeft)
+{
+    if (root == nullptr) {
+        return;
+    }
+
+    string prev_str = "    ";
+    Trunk *trunk = new Trunk(prev, prev_str);
+
+    printTree(root->right, trunk, true);
+
+    if (!prev) {
+        trunk->str = "———";
+    }
+    else if (isLeft)
+    {
+        trunk->str = ".———";
+        prev_str = "   |";
+    }
+    else {
+        trunk->str = "`———";
+        prev->str = prev_str;
+    }
+
+    showTrunks(trunk);
+    cout << root->getValue() << endl;
+
+    if (prev) {
+        prev->str = prev_str;
+    }
+    trunk->str = "   |";
+
+    printTree(root->left, trunk, false);
+}
+
 Node::Node(int val) {
     m_value = val;
     left = nullptr;
@@ -66,86 +127,38 @@ Node* Node::find(int value)
     return nullptr;
 }
 
-void Node::remove(Node* root, int value) {
 
-    Node* remove_p = find(value);
-    Node* switch_p;
+Node* Node::remove(int value ) {
 
-    if( remove_p->left == nullptr && remove_p->right == nullptr) {
-
-
-        Node* tmp = root;
-        while(tmp != nullptr ) {
-
-            if( tmp->getValue() == remove_p->getValue() ) {
-                //같은경우
-                if( tmp->left != nullptr && tmp->left->getValue() == remove_p->getValue() ) {
-                    tmp->left = nullptr;
-                    delete remove_p;
-                    return ;
-                }
-                else if( tmp->right != nullptr && tmp->right->getValue() == remove_p->getValue() ) {
-                    tmp->right = nullptr;
-                    delete remove_p;
-                    return ;
-                }
-            } else if( tmp->getValue() > remove_p->getValue() ) {
-                if( tmp->left == remove_p ) {
-                    tmp->left = nullptr;
-                    delete remove_p;
-                    return ;
-                }
-                /*if( tmp->left != nullptr && tmp->left->getValue() == remove_p->getValue() ) {
-                    tmp->left = nullptr;
-                    delete remove_p;
-                    return ;
-                }*/
-                else {
-                    tmp = tmp->left;
-                }
-            } else if( tmp->getValue() < remove_p->getValue() ) {
-
-                if( tmp->right == remove_p ) {
-                    tmp->right = nullptr;
-                    delete remove_p;
-                    return ;
-                }
-                /*if( tmp->right != nullptr && tmp->right->getValue() == remove_p->getValue() ) {
-                    tmp->right = nullptr;
-                    delete remove_p;
-                    return ;
-                }*/
-                else {
-                    tmp = tmp->right;
-                }
-            }
-
-        }
-
-    } else {
-        switch_p = remove_p;
-
-        if( switch_p->left != nullptr) {
-            switch_p = switch_p->left;
-            // left 에서 가장 큰값
-            while( switch_p->right != nullptr ) {
+    if( this->getValue() == value) {
+        if( this->left != nullptr ) {
+            //왼쪽 최대값
+            Node* switch_p = this->left;
+            while(switch_p->right!=nullptr) {
                 switch_p = switch_p->right;
             }
-            remove_p->setValue(switch_p->getValue());
-            (remove_p->left)->remove(root, switch_p->getValue());
-
-        } else {
-            switch_p = switch_p->right;
-            // right 에서 가장 작은값
-            while( switch_p->left != nullptr) {
+            this->setValue(switch_p->getValue());
+            this->left = this->left->remove(switch_p->getValue());
+        } else if( this->right != nullptr ) {
+            // 오른쪽의 최소값 찾기
+            Node* switch_p = this->right;
+            while(switch_p->left != nullptr) {
                 switch_p = switch_p->left;
             }
-
-            remove_p->setValue(switch_p->getValue());
-            (remove_p->right)->remove(root, switch_p->getValue());
+            this->setValue(switch_p->getValue());
+            this->right = this->right->remove(switch_p->getValue());
+        } else {
+            return nullptr;
         }
-    }
+    } else if( this->getValue() > value ) {
+        Node* temp = this->left;
+        this->left = this->left->remove( value);
+        if( this->left == nullptr)
+            delete temp;
+    } else {
 
+        this->right = this->right->remove(value);
+    }
 }
 
 
@@ -214,20 +227,30 @@ int main()
     root->insert(10);
 
 
-    root->print2DUtil(0);
+    //root->print2DUtil(0);
+
+    printTree(root, nullptr, false);
+
 cout << endl;
 cout << "travel tree inoder " << endl;
-    travel_tree_inorder(root);
-
-    cout << endl;
-    cout << "######### Delete 5 #########" << endl;
-
-    root->remove(root, 5);
-
-    cout << endl;
-    root->print2DUtil(0);
-
     //travel_tree_inorder(root);
+
+    cout << endl;
+    //cout << "######### Delete 5 #########" << endl;
+
+    //root->remove( 5);
+
+    cout << endl;
+    //root->print2DUtil(0);
+    printTree(root, nullptr, false);
+
+    //printTree(root, nullptr, false);
+/*
+    for(int i=1; i <=10; i++) {
+        root = root->remove(i);
+        printTree(root, nullptr, false);
+    }*/
+    travel_tree_inorder(root);
     return 0;
 
 }
