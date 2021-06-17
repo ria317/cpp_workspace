@@ -10,13 +10,12 @@ public:
     Node* right;
 
     Node(int val);
-    Node();
     ~Node();
     int getValue(){ return m_value; }
     void setValue(int val) { m_value = val; }
 
     bool insert(int value);
-    void remove(int value);
+    void remove(Node* root, int value);
     Node *find(int val);
     Node *find_parent(int val);
     void print2DUtil(int space);

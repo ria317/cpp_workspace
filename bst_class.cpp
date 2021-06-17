@@ -12,16 +12,12 @@ Node::Node(int val) {
     right = nullptr;
 }
 
-Node::Node() {
-
-    left = nullptr;
-    right = nullptr;
-}
-
 Node::~Node() {
 
-}
 
+    //delete this
+
+}
 
 bool Node::insert(int value)
 {
@@ -70,53 +66,62 @@ Node* Node::find(int value)
     return nullptr;
 }
 
-Node* Node::find_parent(int value)
-{
+void Node::remove(Node* root, int value) {
 
-    Node* res = this;
-
-    if( res->getValue() == value) {
-        return nullptr;
-    }
-
-    while( res != nullptr )
-    {
-        if( res->left->getValue() == value || res->right->getValue() == value ) {
-            return res;
-        } else {
-            if( res->getValue() > value ) {
-                //go to right
-                res = res->right;
-            } else {
-                // go to left
-                res = res->left;
-            }
-        }
-    }
-    return nullptr;
-}
-
-void Node::remove(int value) {
-
-    Node* parent = find_parent(value);
     Node* remove_p = find(value);
     Node* switch_p;
 
     if( remove_p->left == nullptr && remove_p->right == nullptr) {
-        if( parent == nullptr) {
-            //head 임..
-            delete remove_p;
 
-        } else {
-            if( parent->right->getValue() == value ) {
-                parent->right = nullptr;
-                delete remove_p;
 
-            } else if( parent->left->getValue() == value ) {
-                parent->left = nullptr;
-                delete remove_p;
+        Node* tmp = root;
+        while(tmp != nullptr ) {
+
+            if( tmp->getValue() == remove_p->getValue() ) {
+                //같은경우
+                if( tmp->left != nullptr && tmp->left->getValue() == remove_p->getValue() ) {
+                    tmp->left = nullptr;
+                    delete remove_p;
+                    return ;
+                }
+                else if( tmp->right != nullptr && tmp->right->getValue() == remove_p->getValue() ) {
+                    tmp->right = nullptr;
+                    delete remove_p;
+                    return ;
+                }
+            } else if( tmp->getValue() > remove_p->getValue() ) {
+                if( tmp->left == remove_p ) {
+                    tmp->left = nullptr;
+                    delete remove_p;
+                    return ;
+                }
+                /*if( tmp->left != nullptr && tmp->left->getValue() == remove_p->getValue() ) {
+                    tmp->left = nullptr;
+                    delete remove_p;
+                    return ;
+                }*/
+                else {
+                    tmp = tmp->left;
+                }
+            } else if( tmp->getValue() < remove_p->getValue() ) {
+
+                if( tmp->right == remove_p ) {
+                    tmp->right = nullptr;
+                    delete remove_p;
+                    return ;
+                }
+                /*if( tmp->right != nullptr && tmp->right->getValue() == remove_p->getValue() ) {
+                    tmp->right = nullptr;
+                    delete remove_p;
+                    return ;
+                }*/
+                else {
+                    tmp = tmp->right;
+                }
             }
+
         }
+
     } else {
         switch_p = remove_p;
 
@@ -127,7 +132,7 @@ void Node::remove(int value) {
                 switch_p = switch_p->right;
             }
             remove_p->setValue(switch_p->getValue());
-            (remove_p->left)->remove(switch_p->getValue());
+            (remove_p->left)->remove(root, switch_p->getValue());
 
         } else {
             switch_p = switch_p->right;
@@ -137,7 +142,7 @@ void Node::remove(int value) {
             }
 
             remove_p->setValue(switch_p->getValue());
-            (remove_p->right)->remove(switch_p->getValue());
+            (remove_p->right)->remove(root, switch_p->getValue());
         }
     }
 
@@ -195,26 +200,34 @@ void travel_tree_inorder(Node *node) {
 
 int main()
 {
-    Node *root = new Node(4);
+    Node *root = new Node(5);
 
 
     root->insert(2);
+    root->insert(7);
     root->insert(1);
+    root->insert(4);
     root->insert(3);
     root->insert(6);
-    root->insert(5);
-    root->insert(7);
+    root->insert(9);
+    root->insert(8);
+    root->insert(10);
 
 
     root->print2DUtil(0);
+cout << endl;
+cout << "travel tree inoder " << endl;
+    travel_tree_inorder(root);
 
     cout << endl;
-    cout << "######### Delete 2 #########" << endl;
+    cout << "######### Delete 5 #########" << endl;
 
-    root->remove(2);
+    root->remove(root, 5);
 
     cout << endl;
     root->print2DUtil(0);
+
+    //travel_tree_inorder(root);
     return 0;
 
 }
