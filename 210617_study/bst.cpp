@@ -1,5 +1,7 @@
 #include <iostream>
 #include <stack>
+#include <queue>
+#include <vector>
 #include "bst.h"
 
 using namespace std;
@@ -122,65 +124,94 @@ Node* BST::find(int value) {
     return nullptr;
 }
 
-struct Trunk
-{
-    Trunk *prev;
-    string str;
+int BST::BFS_travel() {
 
-    Trunk(Trunk *prev, string str)
-    {
-        this->prev = prev;
-        this->str = str;
+    queue<Node> q;
+    queue<int> depth;
+    int i=0;
+
+    Node idx = 0x00;
+    int d = 0;
+
+    int ret = 0;
+
+    q.push(*this->root);
+    depth.push(i);
+
+    while(!q.empty()) {
+
+        idx = q.front();
+        q.pop();
+        d = depth.front();
+        depth.pop();
+        ret = max(d, ret);
+
+//cout << "val : " << idx.value << ", depth : " << d << endl;
+
+        if( idx.left != nullptr ) {
+            q.push(*idx.left);
+            depth.push(d+1);
+        }
+        if( idx.right != nullptr) {
+            q.push(*idx.right);
+            depth.push(d+1);
+        }
+
     }
-};
 
-// Helper function to print branches of the binary tree
-void showTrunks(Trunk *p)
-{
-    if (p == nullptr) {
-        return;
-    }
-
-    showTrunks(p->prev);
-    cout << p->str;
+    return ret;
 }
 
-// Recursive function to print a binary tree.
-// It uses the inorder traversal.
-void printTree(Node* root, Trunk *prev, bool isLeft)
-{
-    if (root == nullptr) {
-        return;
+void rec_print(vector<vector<char>>&map, Node* p, int x, int y) {
+
+    //print
+    if( p->value  >= 10 ) {
+        map[x][y] = ((p->value)/10) + 48;
+        map[x][y+1] = ((p->value)%10) + 48;
+    } else {
+        map[x][y] = (p->value)+48;
     }
 
-    string prev_str = "    ";
-    Trunk *trunk = new Trunk(prev, prev_str);
-
-    printTree(root->right, trunk, true);
-
-    if (!prev) {
-        trunk->str = "———";
+    if(p->left != nullptr) {
+        map[x+1][y-1] = '/';
+        if( map[x+2][y-2] != 0 ) {
+            rec_print(map, p->left, x+2, y-1);
+        } else {
+            rec_print(map, p->left, x+2 , y-2);
+        }
     }
-    else if (isLeft)
-    {
-        trunk->str = ".———";
-        prev_str = "   |";
-    }
-    else {
-        trunk->str = "`———";
-        prev->str = prev_str;
+    if( p->right != nullptr) {
+        map[x+1][y+1] = '\\';
+        if( map[x+2][y+2] != 0 ) {
+            rec_print(map, p->right, x+2, y+3);
+        } else {
+            rec_print(map, p->right, x+2, y+2);
+        }
+        //rec_print(map, p->right, x+2, y+2);
     }
 
-    showTrunks(trunk);
-    cout << root->value << endl;
-
-    if (prev) {
-        prev->str = prev_str;
-    }
-    trunk->str = "   |";
-
-    printTree(root->left, trunk, false);
 }
+
+void BST::print_tree() {
+
+    int y_max = this->BFS_travel();
+    vector<vector<char>> map(y_max*4, vector<char>(120));
+
+    Node* p = this->root;
+
+    //세로 depth는 BFS로 구하기
+
+    //.가로는 root로 시작해서 왼쪽 끝, 오른쪽 끝지점 각각 구함.
+    rec_print(map, p, 0, map[0].size()/2);
+
+    for(int i=0; i<map.size(); i++){
+        for(int j=0; j<map[0].size(); j++) {
+            cout << map[i][j];
+        }
+        cout << endl;
+    }
+}
+
 
 int main(void) {
 
@@ -197,16 +228,12 @@ int main(void) {
     tree->insert(8);
     tree->insert(10);
 
-    printTree(tree->getRoot(), nullptr , false);
+    tree->print_tree();
 
+    //tree->remove(tree->getRoot(), 1);
+    //tree->remove(tree->getRoot(), 2);
+    //tree->remove(tree->getRoot(), 3);
+    //tree->remove(tree->getRoot(), 4);
 
-    tree->remove(tree->getRoot(), 1);
-    printTree(tree->getRoot(), nullptr , false);
-    tree->remove(tree->getRoot(), 2);
-    printTree(tree->getRoot(), nullptr , false);
-    tree->remove(tree->getRoot(), 3);
-    printTree(tree->getRoot(), nullptr , false);
-    tree->remove(tree->getRoot(), 4);
-    printTree(tree->getRoot(), nullptr , false);
 
 }

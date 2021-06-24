@@ -35,6 +35,8 @@ public:
 
     void inorder_travel();
 
-    //void print2DUtil(int space);
+    void print_tree();
+
+    int BFS_travel();
 
 };
